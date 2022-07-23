@@ -1,0 +1,56 @@
+<!doctype html>
+{% load static %}
+<html lang="en">
+  <head>
+    <!-- Required meta tags -->
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <link href="https://fonts.googleapis.com/css?family=Roboto:300,400&display=swap" rel="stylesheet">
+
+    <link href="https://fonts.googleapis.com/css?family=Poppins:300,400,500&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="{% static 'bootstraps/fonts/icomoon/style.css' %}">
+    <link href="{% static 'bootstraps/fullcalendar/packages/core/main.css' %}" rel='stylesheet' />
+    <link href="{% static 'bootstraps/fullcalendar/packages/daygrid/main.css' %}" rel='stylesheet' />
+    <!-- Bootstrap CSS -->
+    <link rel="stylesheet" href="{% static 'bootstraps/css/bootstrap.min.css' %}">
+    <!-- Style -->
+    <link rel="stylesheet" href="{% static 'bootstraps/css/style.css' %}">
+    <title>My Schedule</title>
+  </head>
+  <body>
+  
+
+  <div class="content">
+    <div id='calendar'></div>
+  </div>    
+    <script src="{% static 'bootstraps/js/jquery-3.3.1.min.js' %}"></script>
+    <script src="{% static 'bootstraps/js/popper.min.js' %}"></script>
+    <script src="{% static 'bootstraps/js/bootstrap.min.js' %}"></script>
+
+    <script src="{% static 'bootstraps/fullcalendar/packages/core/main.js' %}"></script>
+    <script src="{% static 'bootstraps/fullcalendar/packages/interaction/main.js' %}"></script>
+    <script src="{% static 'bootstraps/fullcalendar/packages/daygrid/main.js' %}"></script>
+    </script>
+    <script src="{% static 'bootstraps/js/main.js' %}"></script>
+    {{ event|json_script:"event" }}
+    <script>  
+    document.addEventListener('DOMContentLoaded', function() {
+      var calendarEl = document.getElementById('calendar');
+      const event = JSON.parse(document.getElementById("event").innerHTML);
+      var calendar = new FullCalendar.Calendar(calendarEl, {
+        plugins: [ 'interaction', 'dayGrid' ],
+        defaultDate: '2020-02-12',
+        eventClick: function(info) {
+          window.location.href = "/create_reservation/";
+        },
+        editable: true,
+        eventLimit: true, // allow "more" link when too many events
+        events:  event,
+        displayEventTime: false,
+      });
+      calendar.render();
+    });
+  
+      </script>
+  </body>
+</html>
