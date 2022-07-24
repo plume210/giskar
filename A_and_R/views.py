@@ -1,63 +1,15 @@
+import email
 from django.forms import ValidationError
 from django.shortcuts import render
 import pytz
-from .forms import AvailabilitiesForm, ReservationsForm
+from .forms import AvailabilitiesForm, ReservationsForm, ReservationsFormDelete
 from django.http import HttpResponse, HttpResponseRedirect
 from .models import *
-from django.views import generic
-from .utils import *
-from django.utils.safestring import mark_safe
-from datetime import date, datetime
+from datetime import datetime, timedelta, time
 utc = pytz.UTC
 
 def home(request):
     return render(request, 'calendars/index.html')
-
-class CalendarView(generic.TemplateView):
-    model = Reservation
-    template_name = 'calendars/calendar.html'
-    def get_context_data(self, date=date.today() ,**kwargs):
-        context = super().get_context_data(**kwargs)
-        try :
-            year = int(context['year'][:-1])
-        except:
-            year = date.today().year
-        try :
-            month = int(context['month'][:-1])
-        except:
-            if (year == date.today().year):
-                month = date.today().month
-            else:
-                month = 1
-        # use today's date for the calendar
-        # Instantiate our calendar class with today's year and date
-        cal = Calendar(year,month)
-        # Call the formatmonth method, which returns our calendar as a table
-        html_cal = cal.formatmonth(withyear=True)
-        context['left_button'] = mark_safe(self.create_button_left(year, month))
-        context['right_button'] = mark_safe(self.create_right_button(year, month))
-        context['calendar'] = mark_safe(html_cal)
-        return context
-    
-    def create_button_left(self, year, month):
-        year_before = year
-        month_before = month - 1
-        if (month == 1):
-            year_before = year - 1
-            month_before = 12        
-        return "<form action=/" + str(year_before) + "/" + str(month_before) + "/>  <button class=\"date-button\"><</button></form>"
-    def create_right_button(self, year, month):
-        year_after = year
-        month_after = month + 1
-        if (month == 12):
-            year_after = year + 1
-            month_after = 1
-        return "<form action=/" + str(year_after) + "/" + str(month_after) + "/>  <button class=\"date-button\">></button></form>"
-def get_date(req_day):
-    if req_day:
-        year, month = (int(x) for x in req_day.split('-'))
-        return date(year, month, day=1)
-    return datetime.today()
 
 # Create my reservation here.
 # if you reserve a slot that is not available, there will be an error.
@@ -76,33 +28,49 @@ def create_reservation(request):
                 reservation.start = utc.localize(reservation.start)
                 reservation.email = form.cleaned_data['email']
                 reservation.save()
-                available.reduce_avalaibility(reservation.start, reservation.end)
+                available.reduce_availability(reservation.start, reservation.end)
                 return HttpResponseRedirect('/')
-        return render(request, 'calendars/create.html', {'form': form})
+        return render(request, 'calendars/create_reservation.html', {'form': form})
     except ValidationError as e:
         return HttpResponse(e)
     
 def delete_reservation(request):
-    pass
+    form = ReservationsFormDelete()
+    if request.method == 'POST':
+        form = ReservationsFormDelete(request.POST)
+        delete = form.validate()
+        if (delete != None):
+            delete.delete()
+            return HttpResponseRedirect('/')
+        else:
+            return HttpResponse("Error wrong email or date")
+    return render(request, 'calendars/delete_reservation.html', {'form': form})
 
 # Create my availability here.
-def create_avalaibility(request):   
+def create_availability(request):   
     form = AvailabilitiesForm()
     if request.method == 'POST':
         form = AvailabilitiesForm(request.POST)
         if form.validate():
-            availability = Avalaibilities(start = datetime.combine(form.cleaned_data['start'], form.cleaned_data['start_hour']),
-                             end = datetime.combine(form.cleaned_data['end'], form.cleaned_data['end_hour']))
-            availability.save()
-            Reservation.objects.filter(start__range=(availability.start, availability.end)).delete()
+            print(form.cleaned_data["start_hour"])
+            start_time = datetime.combine(form.cleaned_data['start'], form.cleaned_data['start_hour'])
+            end_time = datetime.combine(form.cleaned_data['end'], form.cleaned_data['end_hour'])
+            while (start_time < end_time):   
+                availability = Availabilities()
+                availability.start = start_time
+                if (start_time.day == end_time.day):
+                    availability.end = end_time
+                else :
+                    availability.end = datetime.combine(start_time.date(), time(hour=19,minute=59,second=59))   # end of the day
+                availability.save()
+                start_time = start_time + timedelta(days=1)
+                start_time = start_time.replace(hour=9, minute=0, second=0) 
             return HttpResponseRedirect('/')
-    list_availability(request)
     return render(request, 'calendars/create.html', {'form': form})
 
 def list_availability(request):
-    availabilities = Avalaibilities.objects.values_list()
+    availabilities = Availabilities.objects.values_list()
     event = []
     for availability in availabilities:
         event.append({'title':"Available", 'start':availability[1].strftime("%Y-%m-%dT%H:%M:%S"), 'end':availability[2].strftime("%Y-%m-%dT%H:%M:%S")})
-    print(event)
     return render(request, 'calendars/index.html', {'event': event})

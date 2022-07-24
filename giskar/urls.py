@@ -18,7 +18,8 @@ from A_and_R import views
 
 app_name='A_and_R'
 urlpatterns = [
-    re_path(r'^home/$', views.list_availability, name='home'),
+    re_path(r'^$', views.list_availability, name='home'),
+    re_path(r'^delete_reservation/$', views.delete_reservation, name='delete_reservation'),
     re_path(r'^create_reservation/$', views.create_reservation, name='create_reservation'),
-    re_path(r'^create_avalaibility/$', views.create_avalaibility, name='create_availability'),
+    re_path(r'^create_availability/$', views.create_availability, name='create_availability'),
 ]

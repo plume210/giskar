@@ -15,7 +15,7 @@ class AvailabilitiesForm(forms.ModelForm):
     start_hour = forms.TimeField(widget=TimeInput())
     end_hour = forms.TimeField(widget=TimeInput())
     class Meta:
-        model = Avalaibilities
+        model = Availabilities
         fields = ['start', 'end']
         widgets = {"start": DateInput(), "end": DateInput()}
     
@@ -26,6 +26,23 @@ class AvailabilitiesForm(forms.ModelForm):
         if start_time > end_time:
             raise ValidationError("Start time is after end time")
         return True
+    
+class ReservationsFormDelete(forms.ModelForm):
+    start_hour = forms.TimeField(widget=TimeInput())
+    end_hour = forms.TimeField(widget=TimeInput())
+    class Meta:
+        model = Reservation
+        fields = ['start', 'end', 'email']
+        widgets = {"start": DateInput(), "end": DateInput()}
+    
+    def validate(self):
+        super().is_valid()
+        start = datetime.datetime.combine(self.cleaned_data['start'],self.cleaned_data['start_hour'])
+        start = utc.localize(start)
+        end = datetime.datetime.combine(self.cleaned_data['end'],self.cleaned_data['end_hour'])
+        end = utc.localize(end)
+        delete = Reservation.objects.get(start=start, end=end, email=self.cleaned_data['email'])
+        return delete
 
 class ReservationsForm(forms.ModelForm):
     start_hour = forms.TimeField(widget=TimeInput())
@@ -41,7 +58,7 @@ class ReservationsForm(forms.ModelForm):
         start = utc.localize(start)
         end = datetime.datetime.combine(self.cleaned_data['end'],self.cleaned_data['end_hour'])
         end = utc.localize(end)
-        all_availabilitys = Avalaibilities.objects.all()
+        all_availabilitys = Availabilities.objects.all()
         available = None
         for availability in all_availabilitys:
             if availability.start < start and availability.end > end:
