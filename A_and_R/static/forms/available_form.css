@@ -20,6 +20,11 @@ html {
     box-shadow: 0 15px 25px rgba(0,0,0,.6);
     border-radius: 10px;
   }
+  .form p[id="error"] {
+    color: #f00;
+    font-size: 12px;
+    margin-top: 10px;
+  }
   .form p {
     margin: 20 0 20px;
     color: #fff;
@@ -44,3 +49,4 @@ html {
     font-size: 20px;
     cursor: pointer;
   }
+

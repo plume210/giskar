@@ -40,7 +40,6 @@ INSTALLED_APPS = [
     'A_and_R.apps.AAndRConfig',
 ]
 
-STATIC_ROOT = "A_and_R/static/"
 
 DEBUG = True
 
@@ -60,7 +59,7 @@ TEMPLATE_CONTEXT_PROCESSORS = ["django.template.context_processors.request"]
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
-        'DIRS': [BASE_DIR.joinpath("A_and_R").joinpath("templates")],
+        'DIRS': [BASE_DIR.joinpath("templates")],
         'APP_DIRS': True,
         'OPTIONS': {
             'context_processors': [
@@ -121,7 +120,9 @@ USE_TZ = True
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/4.0/howto/static-files/
 
+STATIC_ROOT = 'A_and_R/static/'
 STATIC_URL = 'static/'
+
 
 # Default primary key field type
 # https://docs.djangoproject.com/en/4.0/ref/settings/#default-auto-field

@@ -8,9 +8,7 @@ class DateInput(forms.DateInput):
     input_type = 'date'
 class TimeInput(forms.TimeInput):
     input_type = 'time'
-
 utc=pytz.UTC
-
 class AvailabilitiesForm(forms.ModelForm):
     start_hour = forms.TimeField(widget=TimeInput())
     end_hour = forms.TimeField(widget=TimeInput())
@@ -42,7 +40,9 @@ class ReservationsFormDelete(forms.ModelForm):
         end = datetime.datetime.combine(self.cleaned_data['end'],self.cleaned_data['end_hour'])
         end = utc.localize(end)
         delete = Reservation.objects.get(start=start, end=end, email=self.cleaned_data['email'])
-        return delete
+        if delete == None:
+            raise ValidationError("Wrong email or date")
+        return True
 
 class ReservationsForm(forms.ModelForm):
     start_hour = forms.TimeField(widget=TimeInput())
@@ -51,6 +51,7 @@ class ReservationsForm(forms.ModelForm):
         model = Reservation
         fields = ['title', 'email' ,'start', 'end']
         widgets = {"start": DateInput(), "end": DateInput()}
+        
     
     def validate(self):
         super().is_valid()
@@ -65,7 +66,7 @@ class ReservationsForm(forms.ModelForm):
                 available = availability
                 break
         if (available == None):
-            raise ValidationError("This time is not available")
+            raise ValidationError("Time slot is not available")
         if start > end:
             raise ValidationError("Start time is after end time")
         return available
