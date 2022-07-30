@@ -1,5 +1,3 @@
-#TODO : modify the form : delete email (email chosen will be the user email)
-#TODO : delete button reservation ?
-#TODO : add button home on each pages
-#TODO : check erreurs when bad info
-#TODO : change front form 
+To start the server :
+
+python manage.py runserver
