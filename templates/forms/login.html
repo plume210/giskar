@@ -1,0 +1,16 @@
+{% load static %}
+<head>
+    <link rel="stylesheet" href="{% static 'forms/available_form.css' %}">
+</head>
+<body>
+{% block content %}
+    <div class="form">
+            <form method="post">
+                {{ form.as_p }}
+                {% csrf_token %}
+            <button type="submit" class="btn btn-primary">Login</button>
+    </form>
+    <button onclick="window.location.href='/register'" type="register" class="btn btn-primary">Register</button>
+
+{% endblock content %}
+</body>

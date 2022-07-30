@@ -5,9 +5,6 @@
     <!-- Required meta tags -->
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
-    <link href="https://fonts.googleapis.com/css?family=Roboto:300,400&display=swap" rel="stylesheet">
-
-    <link href="https://fonts.googleapis.com/css?family=Poppins:300,400,500&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="{% static 'bootstraps/fonts/icomoon/style.css' %}">
     <link href="{% static 'bootstraps/fullcalendar/packages/core/main.css' %}" rel='stylesheet' />
     <link href="{% static 'bootstraps/fullcalendar/packages/daygrid/main.css' %}" rel='stylesheet' />
@@ -16,65 +13,188 @@
     <link rel="stylesheet" href="{% static 'bootstraps/css/bootstrap.min.css' %}">
     <!-- Style -->
     <link rel="stylesheet" href="{% static 'bootstraps/css/style.css' %}">
+    <!-- MDB STYLE -->
+    <link rel="stylesheet" href="{% static 'mdb-ui-kit/css/mdb.min.css' %}" />
     <title>My Schedule</title>
   </head>
+
   <body>
+    <div class="top-header">
+      <button type="button" class="btn btn-outline-danger btn-rounded" data-mdb-ripple-color="dark" onclick="window.location.href='/'" style="margin-left: 10px; margin-top: 10px;">Home</button>
+      
+      <div class="input-group" id="search">
+        <div class="form-outline">
+          <input type="search" id="form1" class="form-control"/>
+          <label class="form-label" for="form1">Search someone</label>
+        </div>
+        <button type="button" class="btn btn-primary" onclick="getValue();">
+          <i class="fas fa-search"></i>
+        </button>
+        <div class="error-message" id="error">
+          {{ error }}
+        </div>
+        <script>
+          function getValue()
+          {
+            var value = document.getElementById("form1").value;
+            window.location.href = "/" + value;
+          }
+          document.getElementById('search').style.top = "10px";
+          document.getElementById('search').style.position = "absolute";
+          document.getElementById('search').style.left = "400px";
+          var error = document.getElementById("error");
+          console.log(error.innerHTML.length);
+          if (error.innerHTML.trimEnd().length == 0)
+          {
+            error.style.display = "none";
+          }
+          else {
+            error.style.display = "list-item";
+          }
+          error.style.color = 'red';
+          error.style.position = 'inline-block';
+          error.style.marginLeft = '40px';
+          error.style.marginTop = '5px';
+        </script>
+      </div>
+    </div>
 
-
-  <div class="content">
-    <div id='calendar'></div>
+<!-- Modal -->
+  <div class="modal class" id="modalll" style="display: none;">
+  <div class="modal-backdrop fade show"></div>
+    <div class="modal fade show" id="Reservation" tabindex="-1" aria-labelledby="ReservationLabel" aria-modal="true" role="dialog" style="display: block;">
+      <div class="modal-dialog">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h5 class="modal-title" id="ReservationLabel"></h5>
+            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+          </div>
+          <div class="modal-body" id="modal-body">
+          </div>
+          <div class="modal-footer">
+            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal" onclick="document.getElementById('modalll').style = 'display: none;'">Close</button>
+            <button type="button" class="btn btn-primary" id="delete_button">Delete</a>
+          </div>
+        </div>
+      </div>
+    </div>
   </div>
-    <script src="{% static 'bootstraps/js/jquery-3.3.1.min.js' %}"></script>
+    <div class="content">
+      <div id='calendar'></div>
+    </div>
+    <!-- script JS-->
     <script src="{% static 'bootstraps/js/popper.min.js' %}"></script>
     <script src="{% static 'bootstraps/js/bootstrap.min.js' %}"></script>
-
     <script src="{% static 'bootstraps/fullcalendar/packages/core/main.js' %}"></script>
     <script src="{% static 'bootstraps/fullcalendar/packages/interaction/main.js' %}"></script>
     <script src="{% static 'bootstraps/fullcalendar/packages/daygrid/main.js' %}"></script>
     <script src="{% static 'bootstraps/fullcalendar/packages/timegrid/main.js' %}"></script>
     <script src="{% static 'bootstraps/fullcalendar/packages/list/main.js' %}"></script>
+    <script name="delete">
+      var deleted = document.getElementById("delete_button");
+      deleted.onclick = function(info)
+      {
+        var id = document.getElementById("email").innerHTML;
+        var body = document.getElementById("modal-body").innerHTML;
+        var regex_date = /([A-Z][a-z]{2} ){2}[0-9]{2} [0-9]{4} ([0-9]{2}:?){3}/g;
+        var start = body.match(regex_date)[0];
+        var end = body.match(regex_date)[1];
+        console.log('ok')
+        window.location.href =  ('delete_reservation/' + id.substring(1,id.length-1) + '/' + start + '/' + end);
+        
+
+      };
     </script>
-    <script src="{% static 'bootstraps/js/main.js' %}"></script>
-    {{ event|json_script:"event" }}
-    <script>
-    document.addEventListener('DOMContentLoaded', function() {
+    {{ availabilities|json_script:"availabilities" }}
+    {{ reservations|json_script:"reservations" }}
+    {{ owner|json_script:"owner"}}
+    {{ calendar_name|json_script:"calendar_name" }}
+    {{ email|json_script:"email" }}
+    <script name="calendar">
+      document.addEventListener('DOMContentLoaded', function() {
       var calendarEl = document.getElementById('calendar');
-      const event = JSON.parse(document.getElementById("event").innerHTML);
+      const availabilities = JSON.parse(document.getElementById("availabilities").innerHTML);
+      const reservations = JSON.parse(document.getElementById("reservations").innerHTML);
+      var owner = JSON.parse(document.getElementById("owner").innerHTML);
+      var email = JSON.parse(document.getElementById("email").innerHTML);
+      var calendar_name = JSON.parse(document.getElementById("calendar_name").innerHTML);
+      var header = "logout my_account"; // which header to show
+      if (owner == "")
+      {
+        header = "login register";
+        owner = "Guest";
+      }
       var calendar = new FullCalendar.Calendar(calendarEl, {
         plugins: [ 'interaction', 'timeGrid', 'list', 'dayGrid' ],
         defaultView: 'dayGridMonth',
         header: {
-          left: 'prev,next today addAvailability,addReservation',
+          left: header + ' addAvailability',
           center: 'title',
+        },
+        footer: {
+          left: 'prev,next today ',
           right: 'dayGridMonth,timeGridWeek,timeGridDay,listMonth'
         },
         customButtons: {
           addAvailability: {
-            text: 'Add Availability',
+            text: '+',
             click: function() {
-              window.location.href = "/create_availability";
+              window.location.href = "/create_availabilities";
             }
           },
-          addReservation : {
-            text: 'Add Reservation',
+          login : {
+            text: 'Login',
             click: function() {
-              window.location.href = "/create_reservation";
+              window.location.href = "/login";
+            }
+          },
+          logout : {
+            text: 'Logout',
+            click: function() {
+              window.location.href = "/logout";
+            }
+          },
+          register: {
+            text: 'Register',
+            click: function() {
+              window.location.href = "/register";
+            }
+          },
+          my_account: {
+            text: 'Connected as ' + owner,
+            click: function() {
             }
           }
         },
         defaultDate: Date.now(),
-        editable: true,
         eventLimit: true, // allow "more" link when too many events
-        events:  event,
+        eventSources:  [{events : availabilities, color:'green'},{events : reservations, color:'red'}],
         displayEventTime: false,
         eventClick: function(info) {
-          window.location.href = "/reservation/" + info.event.id;
+          if (info.event.title == 'Available')
+          { 
+            var begin = info.event.start.toString().substring(0,24);
+            var end = info.event.end.toString().substring(0,24);
+            if (calendar_name != '')
+              window.location.href = "/create_reservation/" + calendar_name +  '/' + begin + "/" + end ;
+            else
+              window.location.href = "/create_reservation/" + email + "/" + begin + "/" + end ;
+          }
+          else
+          {
+            document.getElementById('modal-body').innerHTML = "Reservation of " + info.event.title + " by " + info.event.extendedProps.email + " from " + info.event.start.toString().substring(0,24) + " to " + info.event.end.toString().substring(0,24);
+            document.getElementById('ReservationLabel').innerHTML = info.event.title;
+            document.getElementById("modalll").style = "display: block;";
+
+          }
         },
         eventColor: '#378006',
+        height : 600,
+        contentHeight: 'auto'
       });
       calendar.render();
     });
 
-      </script>
+    </script>
   </body>
 </html>

@@ -1,0 +1,25 @@
+{% load static %}
+<head>
+    <link rel="stylesheet" href="{% static 'forms/available_form.css' %}">
+</head>
+<body>
+{% block content %}
+    <div class="form">
+            <h2>Create an availability </h2>
+            <form method="post">
+                {{ form.as_p }}
+                {% csrf_token %}
+            <button type="submit" class="btn btn-primary">Submit</button>
+            <ul id="error">
+                {{ error }}
+            </ul>
+        </form>
+{% endblock content %}
+</body>
+
+<script>
+    let error = document.getElementById('error').innerHTML;
+    error = error.replace('[\'','');
+    error = error.replace('\']','');
+    document.getElementById('error').innerHTML = error;
+</script>

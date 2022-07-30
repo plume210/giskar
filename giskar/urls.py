@@ -16,12 +16,16 @@ Including another URLconf
 from django.urls import re_path
 from django.contrib import admin
 from A_and_R import views
-
+from User import views as user_views
 app_name='A_and_R'
 urlpatterns = [
     re_path(r'^admin/', admin.site.urls, name='admin'),
-    re_path(r'^$', views.list_availability, name='home'),
-    re_path(r'^delete_reservation/$', views.delete_reservation, name='delete_reservation'),
-    re_path(r'^create_reservation/$', views.create_reservation, name='create_reservation'),
-    re_path(r'^create_availability/$', views.create_availability, name='create_availability'),
+    re_path(r'^$', views.get_calendar_detail, name='home'),
+    re_path(r'^delete_reservation/((?P<email>[a-z]*@[a-z]*.[a-z]*)/)?((?P<date_start>[0-z ]*)/)?((?P<date_end>[0-z ]*)/)?$', views.delete_reservation, name='delete_reservation'),
+    re_path(r'^create_reservation/((?P<email>[a-z]*@[a-z]*.[a-z]*)/)?((?P<date_start>[0-z ]*)/)?((?P<date_end>[0-z ]*)/)?$', views.create_reservation, name='create_reservation'),
+    re_path(r'^create_availabilities/$', views.create_availabilities, name='create_availability'),
+    re_path(r'^login/$', user_views.loginView.as_view(), name='login'),
+    re_path(r'^register/$', user_views.create_user, name='register'),
+    re_path(r'^logout/$', user_views.logoutView.as_view(), name='logout'),
+    re_path(r'^(?P<name>[a-z]*)/$', views.get_calendars_by_searching, name='get_calendars'),
 ]

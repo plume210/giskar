@@ -1,12 +1,12 @@
-from django.forms import ModelForm
+from django.forms import ModelForm, ValidationError
 from .models import *
 
 class CreateUser(ModelForm):
     class Meta:
         model = User
-        fields = ['username', 'password', 'email', 'first_name', 'last_name']
+        fields = ['email', 'username', 'password']
 
 class LoginForm(ModelForm):
     class Meta:
         model = User
-        fields = ['username', 'password']
+        fields = ['email', 'password']

@@ -38,6 +38,7 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'A_and_R.apps.AAndRConfig',
+    'User.apps.UserConfig',
 ]
 
 
@@ -107,6 +108,8 @@ AUTH_PASSWORD_VALIDATORS = [
 
 # Internationalization
 # https://docs.djangoproject.com/en/4.0/topics/i18n/
+
+AUTH_USER_MODEL = 'User.User'
 
 LANGUAGE_CODE = 'en-us'
 
