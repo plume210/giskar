@@ -1,15 +1,10 @@
-from calendar import calendar
-from tracemalloc import start
 from django.forms import ValidationError
 from django.shortcuts import render
-from matplotlib.style import available
 import pytz
-from requests import get
 from .forms import AvailabilitiesForm, ReservationsForm
-from django.http import HttpResponse, HttpResponseRedirect
+from django.http import HttpResponseRedirect
 from .models import *
-from django.contrib import messages
-from datetime import date, datetime, timedelta, time
+from datetime import date, datetime, timedelta
 utc = pytz.UTC
 
 def home(request, error):
@@ -42,8 +37,12 @@ def create_reservation(request, email="", date_start=str(date.today().strftime('
             available.reduce_availability(reservation.start, reservation.end, reservation.calendar)
             if (request.user.is_authenticated):
                 reservation.calendar.add(Calendar.objects.get(user=request.user))
-                owner_availability = Availabilities.objects.get(start__lte = reservation.start, end__gte = reservation.end , calendar=Calendar.objects.get(user=User.objects.get(email=request.user.email)))
-                owner_availability.reduce_availability(reservation.start, reservation.end, owner_availability.calendar)
+                try :
+                    owner_availability = Availabilities.objects.get(start__lte = reservation.start, end__gte = reservation.end , calendar=Calendar.objects.get(user=User.objects.get(email=request.user.email)))
+                    owner_availability.reduce_availability(reservation.start, reservation.end, owner_availability.calendar)
+                except Availabilities.DoesNotExist:
+                    pass
+            
             return HttpResponseRedirect('/')
         return render(request, 'forms/create_reservation.html', {'form': form})
     except ValidationError as e:
@@ -74,7 +73,7 @@ def create_availabilities(request):
                 # Combine date and hours
                 start_time = datetime.combine(form.cleaned_data['start'], form.cleaned_data['start_hour'])
                 end_time = datetime.combine(form.cleaned_data['end'], form.cleaned_data['end_hour'])
-                # Available only between 9 and 20h every day, i am a busy man
+                # Available only between 9 and 20h every day
                 while (start_time < end_time): 
                     availability = Availabilities()
                     availability.start = start_time

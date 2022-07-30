@@ -27,5 +27,5 @@ urlpatterns = [
     re_path(r'^login/$', user_views.loginView.as_view(), name='login'),
     re_path(r'^register/$', user_views.create_user, name='register'),
     re_path(r'^logout/$', user_views.logoutView.as_view(), name='logout'),
-    re_path(r'^(?P<name>[a-z]*)/$', views.get_calendars_by_searching, name='get_calendars'),
+    re_path(r'^(?P<name>[a-z ]*)/$', views.get_calendars_by_searching, name='get_calendars'),
 ]
